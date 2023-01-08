@@ -34,6 +34,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
         File output = new File(basedir + File.separator + "target");
         File skidfuscatorFolder = new File(basedir + File.separator + "skidfuscator");
         File skidfuscatorJar = new File(basedir +  File.separator + "skidfuscator", "skidfuscator.jar");
+        File manualLibs = new File(skidfuscatorFolder + File.separator + "manualLibs");
         if (!skidfuscatorJar.exists()) {
             throw new RuntimeException("Skifuscator not found in: " + skidfuscatorJar.getAbsolutePath());
         }
@@ -41,7 +42,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
             throw  new RuntimeException("No output file to obfuscate.");
         }
         for (File file : Objects.requireNonNull(skidfuscatorFolder.listFiles())) {
-            if (!file.getName().equals("skidfuscator.jar")) {
+            if (!file.getName().equals("skidfuscator.jar") && !file.getName().equals("manualLibs")) {
                 deleteDirectory(file);
             }
         }
@@ -51,6 +52,9 @@ public class SkidFuscatorMaven extends AbstractMojo {
             if (!dependency.getType().equals("jar"))
                 return;
             compileLibs.add(getJar(dependency, mavenRepo));
+        }
+        if (manualLibs.listFiles() != null) {
+            compileLibs.addAll(Arrays.asList(Objects.requireNonNull(manualLibs.listFiles())));
         }
         new File(skidfuscatorFolder + File.separator + "libs").mkdirs();
         for (File lib : compileLibs) {
