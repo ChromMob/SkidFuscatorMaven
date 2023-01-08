@@ -83,12 +83,26 @@ public class SkidFuscatorMaven extends AbstractMojo {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            Scanner s = new Scanner(process.getInputStream());
+            boolean hasError = false;
+            while (s.hasNextLine()) {
+                String line = s.nextLine();
+                if (line.toLowerCase().contains("error")) {
+                    hasError = true;
+                }
+                if (hasError) {
+                    System.out.println(line);
+                }
+            }
+            s.close();
             try {
                 process.waitFor();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("File successfully obfuscated.");
+            if (!hasError) {
+                System.out.println("Obfuscated: " + outPutFile.getName());
+            }
         }
     }
     private boolean deleteDirectory(File directoryToBeDeleted) {
