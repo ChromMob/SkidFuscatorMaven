@@ -73,9 +73,15 @@ public class SkidFuscatorMaven extends AbstractMojo {
                 throw new RuntimeException(e);
             }
             System.out.println("Obfuscating: " + outPutFile.getName());
+            Process process;
             try {
-                Runtime.getRuntime().exec("java -jar " + skidfuscatorJar.getAbsolutePath() + " " + outputFolder + File.separator + outPutFile.getName() + " -li=" + new File(skidfuscatorFolder + File.separator + "libs"), new String[0], outputFolder);
+                process = Runtime.getRuntime().exec("java -jar " + skidfuscatorJar.getAbsolutePath() + " " + outputFolder + File.separator + outPutFile.getName() + " -li=" + new File(skidfuscatorFolder + File.separator + "libs"), new String[0], outputFolder);
             } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                process.waitFor();
+            } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             System.out.println("File successfully obfuscated.");
