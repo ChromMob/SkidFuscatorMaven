@@ -74,29 +74,11 @@ public class SkidFuscatorMaven extends AbstractMojo {
             }
             System.out.println("Obfuscating: " + outPutFile.getName());
             Process process;
-            System.out.println(new File(skidfuscatorFolder + File.separator + "libs").getAbsolutePath());
             try {
-                process = Runtime.getRuntime().exec("java -jar " + skidfuscatorJar.getAbsolutePath() + " " + outputFolder + File.separator + outPutFile.getName() + " -li=" + new File(skidfuscatorFolder + File.separator + "libs"));
+                process = Runtime.getRuntime().exec("java -jar " + skidfuscatorJar.getAbsolutePath() + " " + outputFolder + File.separator + outPutFile.getName() + " -li=" + new File(skidfuscatorFolder + File.separator + "libs"), new String[0], outputFolder);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            //Read output of process
-            Scanner scanner = new Scanner(process.getInputStream());
-            while (scanner.hasNextLine()) {
-                System.out.println(scanner.nextLine());
-            }
-            scanner.close();
-            try {
-                process.waitFor();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-//            JavaExec javaExec = getProject().getTasks().create("run" + outPutFile.getName().replaceAll(".jar", ""), JavaExec.class);
-//            javaExec.setWorkingDir(outputFolder);
-//            javaExec.getAllJvmArgs().add("-jar");
-//            javaExec.setArgs(List.of(new File(outputFolder + File.separator + outPutFile.getName()).getAbsolutePath(), "-li=" + new File(skidfuscatorFolder + File.separator + "libs")));
-//            javaExec.setClasspath(getProject().files().from(skidfuscatorJar));
-//            javaExec.exec();
             System.out.println("File successfully obfuscated.");
         }
     }
