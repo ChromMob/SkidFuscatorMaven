@@ -60,8 +60,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
                 continue;
             try {
                 Files.copy(lib.toPath(), new File(skidfuscatorFolder + File.separator + "libs" + File.separator + lib.getName()).toPath());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            } catch (IOException ignored) {
             }
         }
         for (File outPutFile : Objects.requireNonNull(output.listFiles())) {
