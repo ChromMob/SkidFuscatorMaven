@@ -11,6 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 @Mojo(name = "skidfuscate", defaultPhase = LifecyclePhase.PACKAGE)
 public class SkidFuscatorMaven extends AbstractMojo {
@@ -61,6 +64,30 @@ public class SkidFuscatorMaven extends AbstractMojo {
             try {
                 Files.copy(lib.toPath(), new File(skidfuscatorFolder + File.separator + "libs" + File.separator + lib.getName()).toPath());
             } catch (IOException ignored) {
+            }
+        }
+        for (File lib: Objects.requireNonNull(new File(skidfuscatorFolder + File.separator + "libs").listFiles())) {
+            if (lib.getName().endsWith(".jar")) {
+                try {
+                    ZipFile zipFile = new ZipFile(lib);
+                    //Check if the jar is a valid jar
+                    ZipEntry entry = zipFile.getEntry("annotations");
+                    if (entry != null) {
+                        System.out.println("Removing " + lib.getName() + " because it is has annotations.");
+                        zipFile.close();
+                        Files.delete(lib.toPath());
+                    }
+                    zipFile.close();
+                } catch (ZipException e) {
+                    System.out.println("Deleting " + lib.getName() + " because it is not a valid jar.");
+                    try {
+                        Files.delete(lib.toPath());
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         for (File outPutFile : Objects.requireNonNull(output.listFiles())) {

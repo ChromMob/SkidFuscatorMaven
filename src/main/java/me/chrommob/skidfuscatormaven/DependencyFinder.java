@@ -16,6 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 public class DependencyFinder {
     private final File mavenDirectory;
@@ -47,13 +49,25 @@ public class DependencyFinder {
                 return new DependencyResponse(file, subDependencies);
             }
         }
+        System.out.println("Could not find dependency " + dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion());
         return null;
     }
 
     private Set<Dependency> getSubDependencies(File file) {
         File parent = file.getParentFile();
-        File pom = new File(parent, file.getName().replace(".jar", ".pom"));
-        if (!pom.exists()) {
+        File pom = null;
+        if (new File(parent, file.getName().replace(".jar", ".pom")).exists()) {
+            pom = new File(parent, file.getName().replace(".jar", ".pom"));
+        } else {
+            for (File possiblePom : parent.listFiles()) {
+                if (possiblePom.getName().endsWith(".pom")) {
+                    pom = possiblePom;
+                    break;
+                }
+            }
+        }
+        if (pom == null) {
+            System.out.println("Could not find pom for " + file.getName());
             return new HashSet<>();
         }
         Set<Dependency> dependencies = new HashSet<>();
@@ -68,7 +82,8 @@ public class DependencyFinder {
         try {
             document = dBuilder.parse(pom);
         } catch (IOException | SAXException e) {
-            throw new RuntimeException(e);
+            System.out.println("Could not parse pom for " + file.getName());
+            return new HashSet<>();
         }
         document.getDocumentElement().normalize();
         Set<String> repositories = new HashSet<>();
@@ -109,28 +124,37 @@ public class DependencyFinder {
                     continue;
                 }
                 if (version.contains("${")) {
-                    String property = version.replace("${", "").replace("}", "");
+                    String property = version.substring(version.indexOf("${") + 2, version.indexOf("}"));
                     if (!(document.getElementsByTagName(property).getLength() == 0 || document.getElementsByTagName(property).item(0) == null)) {
-                        version = document.getElementsByTagName(property).item(0).getTextContent();
+                        String propertyValue = removeEverythingExceptLettersAndNumbers(document.getElementsByTagName(property).item(0).getTextContent());
+                        version = version.replace("${" + property + "}", propertyValue);
                     }
                 }
                 if (groupId.contains("${")) {
-                    String property = groupId.replace("${", "").replace("}", "");
+                    String property = groupId.substring(groupId.indexOf("${") + 2, groupId.indexOf("}"));
                     if (!(document.getElementsByTagName(property).getLength() == 0 || document.getElementsByTagName(property).item(0) == null)) {
-                        groupId = document.getElementsByTagName(property).item(0).getTextContent();
+                        String propertyValue = removeEverythingExceptLettersAndNumbers(document.getElementsByTagName(property).item(0).getTextContent());
+                        groupId = groupId.replace("${" + property + "}", propertyValue);
                     }
                 }
                 if (artifactId.contains("${")) {
-                    String property = artifactId.replace("${", "").replace("}", "");
+                    String property = artifactId.substring(artifactId.indexOf("${") + 2, artifactId.indexOf("}"));
                     if (!(document.getElementsByTagName(property).getLength() == 0 || document.getElementsByTagName(property).item(0) == null)) {
-                        artifactId = document.getElementsByTagName(property).item(0).getTextContent();
+                        String propertyValue = removeEverythingExceptLettersAndNumbers(document.getElementsByTagName(property).item(0).getTextContent());
+                        artifactId = artifactId.replace("${" + property + "}", propertyValue);
                     }
                 }
                 Dependency subDependency = new Dependency(this, groupId, artifactId, version, repositories);
                 dependencies.add(subDependency);
             }
         }
+        System.out.println("Found " + dependencies + " for " + file.getAbsolutePath());
         return dependencies;
+    }
+
+    private String removeEverythingExceptLettersAndNumbers(String string) {
+        //Keep "-" and "." for versions
+        return string.replaceAll("[^a-zA-Z0-9.-]", "");
     }
 
     private File getFromRepository(String repository, String groupId, String artifactId, String version) {
@@ -147,17 +171,18 @@ public class DependencyFinder {
         try {
             URLConnection connection = new URL(url).openConnection();
             connection.setConnectTimeout(10000);
-            connection.setReadTimeout(10000);
             connection.connect();
             temp = new File(temp, artifactId + "-" + version + ".jar");
             if (temp.exists()) {
-                temp.delete();
+                Files.delete(temp.toPath());
             }
             temp.createNewFile();
             try (InputStream inputStream = connection.getInputStream()) {
                 Files.copy(inputStream, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
-            if (temp.length() == 0) {
+            try{
+                new ZipFile(temp).close();
+            } catch (ZipException e) {
                 return null;
             }
             if (!file.exists()) {
@@ -170,12 +195,11 @@ public class DependencyFinder {
 
             connection = new URL(url.replace(".jar", ".pom")).openConnection();
             connection.setConnectTimeout(10000);
-            connection.setReadTimeout(10000);
             connection.connect();
 
             temp = new File(temp.getParentFile(), artifactId + "-" + version + ".pom");
             if (temp.exists()) {
-                temp.delete();
+                Files.delete(temp.toPath());
             }
 
             temp.createNewFile();
@@ -193,6 +217,7 @@ public class DependencyFinder {
                 file.createNewFile();
             }
             Files.move(temp.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Downloaded " + groupId + ":" + artifactId + ":" + version + " from " + url);
             return finalFile;
         } catch (IOException e) {
             return null;
@@ -210,11 +235,26 @@ public class DependencyFinder {
         if (files == null) {
             return null;
         }
+        String fileName = artifactId + "-" + version + ".jar";
         for (File f : files) {
-            if (f.getName().endsWith(".jar")) {
+            if (f.getName().equals(fileName)) {
+                try {
+                    new ZipFile(f).close();
+                } catch (ZipException e) {
+                    System.out.println("Corrupted file: " + f.getAbsolutePath());
+                    try {
+                        Files.delete(f.toPath());
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    continue;
+                } catch (IOException e) {
+                    continue;
+                }
                 return f;
             }
         }
         return null;
     }
 }
+
