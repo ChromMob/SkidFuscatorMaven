@@ -6,10 +6,21 @@
 <plugin>
     <groupId>me.chrommob.skidfuscatormaven</groupId>
     <artifactId>SkidFuscatorMaven</artifactId>
-    <version>1.0</version>
+    <version>1.0.2</version>
 </plugin>
 ```
 3. In the project dir create skidfuscator folder and put skidfuscator.jar into it.
 4. Compile your project.
-5. Run skidfuscate task.
-6. Enjoy!
+5. Optional: Configure the depth you want to find dependencies in. You can do that by modifying the configuration of the plugin. The default value is 3 only increase if you errors regarding dependencies.
+```
+<plugin>
+   <groupId>me.chrommob.skidfuscatormaven</groupId>
+   <artifactId>SkidFuscatorMaven</artifactId>
+   <version>1.0.2</version>
+   <configuration>
+      <maxDepth>4</maxDepth>
+   </configuration>
+</plugin>
+```
+6. Run skidfuscate task.
+7. Enjoy!
