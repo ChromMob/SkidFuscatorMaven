@@ -15,10 +15,13 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-@Mojo(name = "skidfuscate", defaultPhase = LifecyclePhase.PACKAGE)
+@Mojo(name = "skidfuscate")
 public class SkidFuscatorMaven extends AbstractMojo {
+    @Parameter(defaultValue = "3")
+    public int maxDepth = 3;
+
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
-    MavenProject project;
+    private MavenProject project;
     //
     @Parameter(defaultValue = "${project.basedir}", required = true, readonly = true)
     private File basedir;
@@ -49,7 +52,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
             }
         }
         Set<File> compileLibs = new HashSet<>();
-        DependencyFinder dependencyFinder = new DependencyFinder(mavenRepo, skidfuscatorFolder, 3);
+        DependencyFinder dependencyFinder = new DependencyFinder(mavenRepo, skidfuscatorFolder, maxDepth);
         List<Dependency> dependencies = project.getDependencies();
         for (Dependency dependency : dependencies) {
             if (!dependency.getType().equals("jar"))
