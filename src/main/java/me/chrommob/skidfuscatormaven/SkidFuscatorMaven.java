@@ -18,7 +18,7 @@ import java.util.zip.ZipFile;
 @Mojo(name = "skidfuscate")
 public class SkidFuscatorMaven extends AbstractMojo {
     @Parameter(defaultValue = "3")
-    public int maxDepth = 3;
+    public int maxDepth;
 
     @Parameter(defaultValue = "${project}", required = true, readonly = true)
     private MavenProject project;
@@ -35,6 +35,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
 
     @Override
     public void execute() {
+        System.out.println("Max depth: " + maxDepth);
         if (mavenRepo == null) {
             mavenRepo = new File(System.getProperty("user.home") + File.separator + ".m2" + File.separator + "repository");
         }
@@ -58,9 +59,8 @@ public class SkidFuscatorMaven extends AbstractMojo {
         for (Dependency dependency : dependencies) {
             if (!dependency.getType().equals("jar"))
                 return;
-            dependencyFinder.resetDepth();
             System.out.println("Found dependency: " + dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion());
-            me.chrommob.skidfuscatormaven.Dependency dep = new me.chrommob.skidfuscatormaven.Dependency(dependencyFinder, dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(), Collections.singleton("https://repo1.maven.org/maven2/"));
+            me.chrommob.skidfuscatormaven.Dependency dep = new me.chrommob.skidfuscatormaven.Dependency(dependencyFinder, dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(), Collections.singleton("https://repo1.maven.org/maven2/"), 0);
             compileLibs.addAll(dep.getFiles());
         }
         new File(skidfuscatorFolder + File.separator + "libs").mkdirs();
