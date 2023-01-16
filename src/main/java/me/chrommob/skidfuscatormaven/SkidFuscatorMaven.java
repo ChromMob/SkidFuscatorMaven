@@ -42,7 +42,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
         skidfuscatorFolder = new File(basedir + File.separator + "skidfuscator");
         skidfuscatorJar = new File(basedir + File.separator + "skidfuscator", "skidfuscator.jar");
         if (!skidfuscatorJar.exists()) {
-            throw new RuntimeException("Skifuscator not found in: " + skidfuscatorJar.getAbsolutePath());
+            throw new RuntimeException("Skidfuscator not found in: " + skidfuscatorJar.getAbsolutePath());
         }
         if (output.listFiles() == null || Objects.requireNonNull(output.listFiles()).length == 0) {
             throw new RuntimeException("No output file to obfuscate.");
@@ -58,6 +58,8 @@ public class SkidFuscatorMaven extends AbstractMojo {
         for (Dependency dependency : dependencies) {
             if (!dependency.getType().equals("jar"))
                 return;
+            dependencyFinder.resetDepth();
+            System.out.println("Found dependency: " + dependency.getGroupId() + ":" + dependency.getArtifactId() + ":" + dependency.getVersion());
             me.chrommob.skidfuscatormaven.Dependency dep = new me.chrommob.skidfuscatormaven.Dependency(dependencyFinder, dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersion(), Collections.singleton("https://repo1.maven.org/maven2/"));
             compileLibs.addAll(dep.getFiles());
         }

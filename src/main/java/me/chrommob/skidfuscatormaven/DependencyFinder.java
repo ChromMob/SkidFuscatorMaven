@@ -274,4 +274,8 @@ public class DependencyFinder {
     public int getMaxDepth() {
         return maxDepth;
     }
+
+    public void resetDepth() {
+        depth = 0;
+    }
 }
