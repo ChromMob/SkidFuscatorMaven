@@ -20,11 +20,14 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 public class DependencyFinder {
+    private final int maxDepth;
+    private int depth = 0;
     private final File mavenDirectory;
     private final File skidDirectory;
-    public DependencyFinder(File mavenDirectory, File skidDirectory) {
+    public DependencyFinder(File mavenDirectory, File skidDirectory, int maxDepth) {
         this.mavenDirectory = mavenDirectory;
         this.skidDirectory = skidDirectory;
+        this.maxDepth = maxDepth;
     }
     private Set<String> foundDependencies = new HashSet<>();
 
@@ -259,5 +262,16 @@ public class DependencyFinder {
         }
         return null;
     }
-}
 
+    public int getDepth() {
+        return depth;
+    }
+
+    public void addDepth() {
+        depth++;
+    }
+
+    public int getMaxDepth() {
+        return maxDepth;
+    }
+}

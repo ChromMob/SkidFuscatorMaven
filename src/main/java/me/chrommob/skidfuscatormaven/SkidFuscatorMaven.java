@@ -49,7 +49,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
             }
         }
         Set<File> compileLibs = new HashSet<>();
-        DependencyFinder dependencyFinder = new DependencyFinder(mavenRepo, skidfuscatorFolder);
+        DependencyFinder dependencyFinder = new DependencyFinder(mavenRepo, skidfuscatorFolder, 3);
         List<Dependency> dependencies = project.getDependencies();
         for (Dependency dependency : dependencies) {
             if (!dependency.getType().equals("jar"))
