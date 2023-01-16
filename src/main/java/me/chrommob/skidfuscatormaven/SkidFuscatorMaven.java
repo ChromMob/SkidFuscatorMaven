@@ -42,6 +42,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
         File output = new File(basedir + File.separator + "target");
         skidfuscatorFolder = new File(basedir + File.separator + "skidfuscator");
         skidfuscatorJar = new File(basedir + File.separator + "skidfuscator", "skidfuscator.jar");
+        File exclusionFile = new File(basedir + File.separator + "skidfuscator", "exclusions.txt");
         if (!skidfuscatorJar.exists()) {
             throw new RuntimeException("Skidfuscator not found in: " + skidfuscatorJar.getAbsolutePath());
         }
@@ -49,7 +50,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
             throw new RuntimeException("No output file to obfuscate.");
         }
         for (File file : Objects.requireNonNull(skidfuscatorFolder.listFiles())) {
-            if (!file.getName().equals("skidfuscator.jar") && !file.getName().equals("manualLibs")) {
+            if (!file.getName().equals("skidfuscator.jar") && !file.getName().equals("manualLibs") && !file.getName().equals("exclusions.txt")) {
                 deleteDirectory(file);
             }
         }
@@ -118,9 +119,13 @@ public class SkidFuscatorMaven extends AbstractMojo {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+            String command = "java -jar " + skidfuscatorJar.getAbsolutePath() + " " + outputFolder + File.separator + outPutFile.getName() + " -li=" + new File(skidfuscatorFolder + File.separator + "libs");
+            if (exclusionFile.exists()) {
+                command += " -ex=" + exclusionFile.getAbsolutePath();
+            }
             Process process;
             try {
-                process = Runtime.getRuntime().exec("java -jar " + skidfuscatorJar.getAbsolutePath() + " " + outputFolder + File.separator + outPutFile.getName() + " -li=" + new File(skidfuscatorFolder + File.separator + "libs"), new String[0], outputFolder);
+                process = Runtime.getRuntime().exec(command, new String[0], outputFolder);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
