@@ -31,6 +31,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
 
     private File skidfuscatorFolder;
     private File skidfuscatorJar;
+    private File manualLibs;
 
     @Override
     public void execute() {
@@ -67,6 +68,15 @@ public class SkidFuscatorMaven extends AbstractMojo {
             try {
                 Files.copy(lib.toPath(), new File(skidfuscatorFolder + File.separator + "libs" + File.separator + lib.getName()).toPath());
             } catch (IOException ignored) {
+            }
+        }
+        manualLibs = new File(skidfuscatorFolder + File.separator + "manualLibs");
+        if (manualLibs.listFiles() != null && Objects.requireNonNull(manualLibs.listFiles()).length > 0) {
+            for (File lib : Objects.requireNonNull(manualLibs.listFiles())) {
+                try {
+                    Files.copy(lib.toPath(), new File(skidfuscatorFolder + File.separator + "libs" + File.separator + lib.getName()).toPath());
+                } catch (IOException ignored) {
+                }
             }
         }
         for (File lib: Objects.requireNonNull(new File(skidfuscatorFolder + File.separator + "libs").listFiles())) {
