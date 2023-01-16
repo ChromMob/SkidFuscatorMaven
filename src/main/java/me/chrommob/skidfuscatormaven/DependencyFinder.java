@@ -144,6 +144,9 @@ public class DependencyFinder {
                         artifactId = artifactId.replace("${" + property + "}", propertyValue);
                     }
                 }
+                groupId = removeEverythingExceptLettersAndNumbers(groupId);
+                artifactId = removeEverythingExceptLettersAndNumbers(artifactId);
+                version = removeEverythingExceptLettersAndNumbers(version);
                 Dependency subDependency = new Dependency(this, groupId, artifactId, version, repositories);
                 dependencies.add(subDependency);
             }

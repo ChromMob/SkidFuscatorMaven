@@ -110,15 +110,9 @@ public class SkidFuscatorMaven extends AbstractMojo {
                 throw new RuntimeException(e);
             }
             Scanner s = new Scanner(process.getInputStream());
-            boolean hasError = false;
             while (s.hasNextLine()) {
                 String line = s.nextLine();
-                if (line.contains("Error")) {
-                    hasError = true;
-                }
-                if (hasError) {
-                    System.out.println(line);
-                }
+                System.out.println(line);
             }
             s.close();
             try {
@@ -126,9 +120,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            if (!hasError) {
-                System.out.println("Obfuscated: " + outPutFile.getName());
-            }
+            System.out.println("Obfuscated: " + outPutFile.getName());
         }
     }
 
