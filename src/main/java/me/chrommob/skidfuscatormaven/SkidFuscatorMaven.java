@@ -123,6 +123,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
             if (exclusionFile.exists()) {
                 command += " -ex=" + exclusionFile.getAbsolutePath();
             }
+            System.out.println("Running command: " + command);
             Process process;
             try {
                 process = Runtime.getRuntime().exec(command, new String[0], outputFolder);
@@ -130,6 +131,15 @@ public class SkidFuscatorMaven extends AbstractMojo {
                 throw new RuntimeException(e);
             }
             Scanner s = new Scanner(process.getInputStream());
+            while (s.hasNextLine()) {
+                String line = s.nextLine();
+                System.out.println(line);
+            }
+            s.close();
+
+            System.out.println("ERRORS:");
+
+            s = new Scanner(process.getErrorStream());
             while (s.hasNextLine()) {
                 String line = s.nextLine();
                 System.out.println(line);
