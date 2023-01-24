@@ -120,13 +120,15 @@ public class SkidFuscatorMaven extends AbstractMojo {
                 throw new RuntimeException(e);
             }
             String command = "java -jar " + skidfuscatorJar.getAbsolutePath() + " obfuscate " + outputFolder + File.separator + outPutFile.getName() + " -li=" + new File(skidfuscatorFolder + File.separator + "libs");
+            List<String> args = new ArrayList<>(Arrays.asList(command.split(" ")));
             if (configFile.exists()) {
-                command += " -cfg=" + configFile.getAbsolutePath();
+                args.add("-cfg=" + configFile.getAbsolutePath());
             }
-            System.out.println("Running command: " + command);
+            ProcessBuilder processBuilder = new ProcessBuilder(args);
+            System.out.println("Running command: " + args);
             Process process;
             try {
-                process = Runtime.getRuntime().exec(command, new String[0], outputFolder);
+                process = processBuilder.start();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
