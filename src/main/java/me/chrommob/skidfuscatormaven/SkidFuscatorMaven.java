@@ -119,7 +119,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            String command = "java -jar " + skidfuscatorJar.getAbsolutePath() + " " + outputFolder + File.separator + outPutFile.getName() + " -li=" + new File(skidfuscatorFolder + File.separator + "libs");
+            String command = "java -jar " + skidfuscatorJar.getAbsolutePath() + " obfuscate " + outputFolder + File.separator + outPutFile.getName() + " -li=" + new File(skidfuscatorFolder + File.separator + "libs");
             if (configFile.exists()) {
                 command += " -cfg=" + configFile.getAbsolutePath();
             }
