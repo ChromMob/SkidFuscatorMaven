@@ -6,7 +6,7 @@
 <plugin>
     <groupId>me.chrommob.skidfuscatormaven</groupId>
     <artifactId>SkidFuscatorMaven</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 </plugin>
 ```
 3. In the project dir create skidfuscator folder and put skidfuscator.jar into it.
@@ -16,7 +16,7 @@
 <plugin>
    <groupId>me.chrommob.skidfuscatormaven</groupId>
    <artifactId>SkidFuscatorMaven</artifactId>
-   <version>1.0.2</version>
+   <version>1.0.3</version>
    <configuration>
       <maxDepth>4</maxDepth>
    </configuration>
