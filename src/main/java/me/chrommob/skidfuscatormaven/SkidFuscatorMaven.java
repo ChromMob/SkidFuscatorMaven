@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -148,7 +149,7 @@ public class SkidFuscatorMaven extends AbstractMojo {
             }
             s.close();
             try {
-                process.waitFor();
+                process.waitFor(10, TimeUnit.MINUTES);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
